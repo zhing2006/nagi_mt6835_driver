@@ -5,6 +5,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#define NAGI_MT6835_ZERO_REG_STEP    (0.088f)
+#define NAGI_MT6835_ANGLE_RESOLUTION (1 << 21)
+
 /// @brief mt6835 error codes.
 typedef enum nagi_mt6835_error_t {
   NAGI_MT6835_OK = 0, ///< No error.
@@ -12,6 +15,7 @@ typedef enum nagi_mt6835_error_t {
   NAGI_MT6835_HANDLE_NULL, ///< Handle is NULL.
   NAGI_MT6835_POINTER_NULL, ///< Pointer is NULL.
   NAGI_MT6835_INVALID_ARGUMENT, ///< Invalid argument.
+  NAGI_MT6835_CRC_CHECK_FAILED, ///< CRC check failed.
 } nagi_mt6835_error_t;
 
 /// @brief mt6835 command enum.
@@ -20,7 +24,7 @@ typedef enum nagi_mt6835_cmd_enum_t {
   NAGI_MT6835_CMD_WR = (0b0110), ///< User write register.
   NAGI_MT6835_CMD_EEPROM = (0b1100), ///< User erase and program EEPROM.
   NAGI_MT6835_CMD_ZERO = (0b0101), ///< AUTO setting zero.
-  NAGI_MT6835_CMD_BURST = (0b1010), ///< Burst mode.
+  NAGI_MT6835_CMD_CONTINUE = (0b1010), ///< Continue mode.
 } nagi_mt6835_cmd_enum_t;
 
 /// @brief mt6835 register enum.
@@ -51,7 +55,7 @@ typedef enum nagi_mt6835_warning_t {
 /// @brief mt6835 read angle method enum.
 typedef enum nagi_mt6835_read_angle_method_enum_t {
   NAGI_MT6835_READ_ANGLE_METHOD_NORMAL = 0, ///< Normal.
-  NAGI_MT6835_READ_ANGLE_METHOD_BURST = 1, ///< Burst.
+  NAGI_MT6835_READ_ANGLE_METHOD_CONTINUE = 1, ///< Continue.
 } nagi_mt6835_read_angle_method_enum_t;
 
 /// @brief mt6835 data frame.
@@ -122,8 +126,58 @@ nagi_mt6835_error_t nagi_mt6835_set_id(nagi_mt6835_t *pmt6835, uint8_t custom_id
 
 /// @brief Get custom ID from mt6835.
 /// @param[in] pmt6835 mt6835 handle.
-/// @param[out] custom_id custom ID.
+/// @param[out] pcustom_id custom ID.
 /// @return mt6835 error code.
-nagi_mt6835_error_t nagi_mt6835_get_id(nagi_mt6835_t *pmt6835, uint8_t *custom_id);
+nagi_mt6835_error_t nagi_mt6835_get_id(nagi_mt6835_t *pmt6835, uint8_t *pcustom_id);
+
+/// @brief Auto set zero angle to mt6835.
+/// @param[in] pmt6835 mt6835 handle.
+/// @return mt6835 error code.
+nagi_mt6835_error_t nagi_mt6835_auto_zero_angle(nagi_mt6835_t *pmt6835);
+
+/// @brief Set zero angle to mt6835.
+/// @param[in] pmt6835 mt6835 handle.
+/// @param[in] rad zero angle in rad.
+/// @return mt6835 error code.
+nagi_mt6835_error_t nagi_mt6835_set_zero_angle(nagi_mt6835_t *pmt6835, float rad);
+
+/// @brief Get raw angle from mt6835.
+/// @param[in] pmt6835 mt6835 handle.
+/// @param[in] method read angle method.
+/// @param[out] praw_angle raw angle.
+/// @return mt6835 error code.
+nagi_mt6835_error_t nagi_mt6835_get_raw_angle(
+  nagi_mt6835_t *pmt6835,
+  nagi_mt6835_read_angle_method_enum_t method,
+  uint32_t *praw_angle
+);
+
+/// @brief Get raw zero angle from mt6835.
+/// @param[in] pmt6835 mt6835 handle.
+/// @param[out] praw_zero_angle raw zero angle.
+/// @return mt6835 error code.
+nagi_mt6835_error_t nagi_mt6835_get_raw_zero_angle(nagi_mt6835_t *pmt6835, uint16_t *praw_zero_angle);
+
+/// @brief Get angle from mt6835.
+/// @param[in] pmt6835 mt6835 handle.
+/// @param[in] method read angle method.
+/// @param[out] prad_angle angle in rad.
+/// @return mt6835 error code.
+nagi_mt6835_error_t nagi_mt6835_get_angle(
+  nagi_mt6835_t *pmt6835,
+  nagi_mt6835_read_angle_method_enum_t method,
+  float *prad_angle
+);
+
+/// @brief Get zero angle from mt6835.
+/// @param[in] pmt6835 mt6835 handle.
+/// @param[out] prad_angle zero angle in rad.
+/// @return mt6835 error code.
+nagi_mt6835_error_t nagi_mt6835_get_zero_angle(nagi_mt6835_t *pmt6835, float *prad_angle);
+
+/// @brief Program mt6835 eeprom.
+/// @param[in] pmt6835 mt6835 handle.
+/// @return mt6835 error code.
+nagi_mt6835_error_t nagi_mt6835_program_eeprom(nagi_mt6835_t *pmt6835);
 
 #endif // __NAGI_MT6835_H__
