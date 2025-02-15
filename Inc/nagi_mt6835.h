@@ -175,9 +175,69 @@ nagi_mt6835_error_t nagi_mt6835_get_angle(
 /// @return mt6835 error code.
 nagi_mt6835_error_t nagi_mt6835_get_zero_angle(nagi_mt6835_t *pmt6835, float *prad_angle);
 
+/// @brief Set mt6835 ABZ output enable.
+/// @param[in] pmt6835 mt6835 handle.
+/// @param[in] enable enable or disable.
+/// @return mt6835 error code.
+nagi_mt6835_error_t nagi_mt6835_enable_abz_output(nagi_mt6835_t *pmt6835, bool enable);
+
+/// @brief Set mt6835 ABZ ab swap.
+/// @param[in] pmt6835 mt6835 handle.
+/// @param[in] ab_swap AB swap.
+/// @return mt6835 error code.
+nagi_mt6835_error_t nagi_mt6835_set_abz_ab_swap(nagi_mt6835_t *pmt6835, bool ab_swap);
+
+/// @brief Set mt6835 ABZ resolution.
+/// @param[in] pmt6835 mt6835 handle.
+/// @param[in] abz_res ABZ resolution.
+/// @return mt6835 error code.
+nagi_mt6835_error_t nagi_mt6835_set_abz_resolution(nagi_mt6835_t *pmt6835, uint16_t abz_res);
+
+/// @brief Set mt6835 ABZ z position.
+/// @param[in] pmt6835 mt6835 handle.
+/// @param[in] abz_z_pos ABZ z position(0x000 = 0, 0x001 = 0.088, ... 0xFFF = 359.912).
+/// @return mt6835 error code.
+nagi_mt6835_error_t nagi_mt6835_set_abz_z_position(nagi_mt6835_t *pmt6835, uint16_t abz_z_pos);
+
+/// @brief Set mt6835 ABZ z edge.
+/// @param[in] pmt6835 mt6835 handle.
+/// @param[in] abz_z_edge_up ABZ z edge up.
+/// @return mt6835 error code.
+nagi_mt6835_error_t nagi_mt6835_set_abz_z_edge_up(nagi_mt6835_t *pmt6835, bool abz_z_edge_up);
+
+/// @brief Set mt6835 ABZ z pulse width.
+/// @param[in] pmt6835 mt6835 handle.
+/// @param[in] abz_z_pulse_width ABZ z pulse width(0x0 = 1deg, 0x1 = 2deg, 0x2 = 4deg, 0x3 = 8deg, 0x4 = 16deg, 0x5 = 60deg, 0x6 = 120deg, 0x7 = 180deg).
+/// @return mt6835 error code.
+nagi_mt6835_error_t nagi_mt6835_set_abz_z_pulse_width(nagi_mt6835_t *pmt6835, uint8_t abz_z_pulse_width);
+
+/// @brief Set mt6835 ABZ z phase.
+/// @param[in] pmt6835 mt6835 handle.
+/// @param[in] abz_z_phase ABZ z phase(0x0 = a down, 0x1 = b up, 0x2 = a up, 0x3 = b down).
+/// @return mt6835 error code.
+nagi_mt6835_error_t nagi_mt6835_set_abz_z_phase(nagi_mt6835_t *pmt6835, uint8_t abz_z_phase);
+
 /// @brief Program mt6835 eeprom.
 /// @param[in] pmt6835 mt6835 handle.
 /// @return mt6835 error code.
 nagi_mt6835_error_t nagi_mt6835_program_eeprom(nagi_mt6835_t *pmt6835);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// If you want to configure more registers, try to use the following functions.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Read mt6835 register.
+/// @param[in] pmt6835 mt6835 handle.
+/// @param[in] reg register.
+/// @param[out] pdata data.
+/// @return mt6835 error code.
+nagi_mt6835_error_t nagi_mt6835_read_reg(nagi_mt6835_t *pmt6835, nagi_mt6835_reg_enum_t reg, uint8_t *pdata);
+
+/// @brief Write mt6835 register.
+/// @param[in] pmt6835 mt6835 handle.
+/// @param[in] reg register.
+/// @param[in] data data.
+/// @return mt6835 error code.
+nagi_mt6835_error_t nagi_mt6835_write_reg(nagi_mt6835_t *pmt6835, nagi_mt6835_reg_enum_t reg, uint8_t data);
 
 #endif // __NAGI_MT6835_H__
