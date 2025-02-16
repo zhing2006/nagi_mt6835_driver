@@ -339,9 +339,9 @@ nagi_mt6835_error_t nagi_mt6835_enable_abz_output(nagi_mt6835_t *pmt6835, bool e
   }
 
   if (enable) {
-    abz_res1_reg |= 0b00000010;
-  } else {
     abz_res1_reg &= 0b11111101;
+  } else {
+    abz_res1_reg |= 0b00000010;
   }
 
   return mt6835_write_reg(pmt6835, NAGI_MT6835_REG_ABZ_RES1, abz_res1_reg);
@@ -381,7 +381,8 @@ nagi_mt6835_error_t nagi_mt6835_set_abz_resolution(nagi_mt6835_t *pmt6835, uint1
     return err;
   }
   abz_res1_reg = (abz_res1_reg & 0b00000011) | ((abz_res & 0b00111111) << 2);
-  err = mt6835_write_reg(pmt6835, NAGI_MT6835_REG_ABZ_RES2, abz_res >> 8);
+  uint8_t abz_res2_reg = (abz_res >> 6) & 0xFF;
+  err = mt6835_write_reg(pmt6835, NAGI_MT6835_REG_ABZ_RES2, abz_res2_reg);
   if (err != NAGI_MT6835_OK) {
     return err;
   }
