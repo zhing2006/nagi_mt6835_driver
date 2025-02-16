@@ -111,6 +111,8 @@ nagi_mt6835_error_t nagi_mt6835_init(nagi_mt6835_t *pmt6835, const nagi_mt6835_c
   pmt6835->crc_res = false;
   pmt6835->warning = NAGI_MT6835_WARN_NONE;
 
+  pmt6835->is_custom_continuous_reading = false;
+
   return NAGI_MT6835_OK;
 }
 
@@ -251,6 +253,7 @@ nagi_mt6835_error_t nagi_mt6835_get_raw_angle(
     }
   }
 
+  pmt6835->warning = rx_buf[2] & 0x07;
   if (pmt6835->enable_crc_check) {
     if (crc_table(rx_buf, 3) != rx_buf[3]) {
       pmt6835->crc_res = false;
@@ -259,7 +262,6 @@ nagi_mt6835_error_t nagi_mt6835_get_raw_angle(
     pmt6835->crc_res = true;
   }
 
-  pmt6835->warning = rx_buf[2] & 0x07;
   *praw_angle = (rx_buf[0] << 13) | (rx_buf[1] << 5) | (rx_buf[2] >> 3);
 
   return NAGI_MT6835_OK;
@@ -516,4 +518,65 @@ nagi_mt6835_error_t nagi_mt6835_write_reg(nagi_mt6835_t *pmt6835, nagi_mt6835_re
   }
 
   return mt6835_write_reg(pmt6835, reg, data);
+}
+
+nagi_mt6835_error_t nagi_mt6835_custom_continuous_read_begin(nagi_mt6835_t *pmt6835, uint8_t *tx_data, size_t tx_size) {
+  if (pmt6835 == NULL) {
+    return NAGI_MT6835_HANDLE_NULL;
+  }
+  if (tx_data == NULL) {
+    return NAGI_MT6835_POINTER_NULL;
+  }
+  if (pmt6835->enable_crc_check && tx_size < 6) {
+    return NAGI_MT6835_INVALID_ARGUMENT;
+  } else if (!pmt6835->enable_crc_check && tx_size < 5) {
+    return NAGI_MT6835_INVALID_ARGUMENT;
+  }
+
+  pmt6835->data_frame.cmd = NAGI_MT6835_CMD_CONTINUE;
+  pmt6835->data_frame.reg = NAGI_MT6835_REG_ANGLE3;
+  tx_data[0] = pmt6835->data_frame.pack & 0xFF;
+  tx_data[1] = (pmt6835->data_frame.pack >> 8) & 0xFF;
+
+  pmt6835->is_custom_continuous_reading = true;
+
+  return NAGI_MT6835_OK;
+}
+
+nagi_mt6835_error_t nagi_mt6835_custom_continuous_read_end(
+  nagi_mt6835_t *pmt6835,
+  const uint8_t *rx_data,
+  size_t rx_size,
+  float *pangle
+) {
+  if (pmt6835 == NULL) {
+    return NAGI_MT6835_HANDLE_NULL;
+  }
+  if (rx_data == NULL) {
+    return NAGI_MT6835_POINTER_NULL;
+  }
+  if (pangle == NULL) {
+    return NAGI_MT6835_POINTER_NULL;
+  }
+  if (pmt6835->enable_crc_check && rx_size < 6) {
+    return NAGI_MT6835_INVALID_ARGUMENT;
+  } else if (!pmt6835->enable_crc_check && rx_size < 5) {
+    return NAGI_MT6835_INVALID_ARGUMENT;
+  }
+
+  pmt6835->warning = rx_data[4] & 0x07;
+  if (pmt6835->enable_crc_check) {
+    if (crc_table(rx_data + 2, 3) != rx_data[5]) {
+      pmt6835->crc_res = false;
+      return NAGI_MT6835_CRC_CHECK_FAILED;
+    }
+    pmt6835->crc_res = true;
+  }
+
+  uint32_t raw_angle = (rx_data[2] << 13) | (rx_data[3] << 5) | (rx_data[4] >> 3);
+  *pangle = (float)(raw_angle * 2.996056226329803e-6);
+
+  pmt6835->is_custom_continuous_reading = false;
+
+  return NAGI_MT6835_OK;
 }

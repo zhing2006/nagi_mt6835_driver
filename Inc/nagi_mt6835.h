@@ -110,6 +110,8 @@ typedef struct nagi_mt6835_t {
   bool crc_res;
   /// @brief Warning.
   nagi_mt6835_warning_t warning;
+  /// @brief Is in custom continuous read mode.
+  bool is_custom_continuous_reading;
 } nagi_mt6835_t;
 
 /// @brief Initialize the mt6835.
@@ -239,5 +241,29 @@ nagi_mt6835_error_t nagi_mt6835_read_reg(nagi_mt6835_t *pmt6835, nagi_mt6835_reg
 /// @param[in] data data.
 /// @return mt6835 error code.
 nagi_mt6835_error_t nagi_mt6835_write_reg(nagi_mt6835_t *pmt6835, nagi_mt6835_reg_enum_t reg, uint8_t data);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Below functions are for custom SPI communication to read angle data.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/// @brief Perpare continuous read command.
+/// @param[in] pmt6835 mt6835 handle.
+/// @param[out] tx_data tx data.
+/// @param[in] tx_size tx size.
+/// @return mt6835 error code.
+nagi_mt6835_error_t nagi_mt6835_custom_continuous_read_begin(nagi_mt6835_t *pmt6835, uint8_t *tx_data, size_t tx_size);
+
+/// @brief Get continuous read angle.
+/// @param[in] pmt6835 mt6835 handle.
+/// @param[in] rx_data rx data.
+/// @param[in] rx_size rx size.
+/// @param[out] pangle angle.
+/// @return mt6835 error code.
+nagi_mt6835_error_t nagi_mt6835_custom_continuous_read_end(
+  nagi_mt6835_t *pmt6835,
+  const uint8_t *rx_data,
+  size_t rx_size,
+  float *pangle
+);
 
 #endif // __NAGI_MT6835_H__
